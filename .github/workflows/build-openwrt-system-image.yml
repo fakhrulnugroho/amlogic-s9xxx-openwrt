@@ -11,7 +11,7 @@ on:
     inputs:
       source_branch:
         description: "Select the source branch"
-        required: false
+        required: true
         default: "openwrt_openwrt-24.10"
       openwrt_board:
         description: "Select device board"
@@ -33,20 +33,12 @@ on:
         type: boolean
       kernel_repo:
         description: "Set the kernel repository"
-        required: false
+        required: true
         default: "ophub/kernel"
-        type: choice
-        options:
-          - ophub/kernel
       kernel_usage:
         description: "Set the tags of the stable kernel."
-        required: false
+        required: true
         default: "stable"
-        type: choice
-        options:
-          - stable
-          - flippy
-          - beta
       openwrt_ip:
         description: "Set OpenWrt default IP address."
         required: false
@@ -58,21 +50,12 @@ on:
         type: boolean
       openwrt_storage:
         description: "Select image storage type."
-        required: false
+        required: true
         default: "save"
-        type: choice
-        options:
-          - save
-          - temp
       builder_name:
         description: "Set OpenWrt builder signature."
-        required: false
+        required: true
         default: "ophub"
-        type: choice
-        options:
-          - ophub
-          - angel
-          - yourname
 
 env:
   FEEDS_CONF: config/${{ inputs.source_branch }}/feeds.conf.default
@@ -144,16 +127,7 @@ jobs:
         if: ${{ steps.init.outputs.status == 'success' && !cancelled() }}
         run: |
           # Set up compilation source code
-          if [[ "${{ inputs.source_branch }}" =~ ^openwrt ]]; then
-              REPO_URL="https://github.com/openwrt/openwrt"
-          elif [[ "${{ inputs.source_branch }}" =~ ^lede ]]; then
-              REPO_URL="https://github.com/coolsnowwolf/lede"
-          elif [[ "${{ inputs.source_branch }}" =~ ^immortalwrt ]]; then
-              REPO_URL="https://github.com/immortalwrt/immortalwrt"
-          else
-              echo "Unknown source code repository."
-              exit 1
-          fi
+          REPO_URL="https://github.com/openwrt/openwrt"
           source_branch_input="${{ inputs.source_branch }}"
           REPO_NAME="${source_branch_input%_*}"
           REPO_BRANCH="${source_branch_input##*_}"
@@ -164,7 +138,7 @@ jobs:
           ln -sf /builder/openwrt /home/runner/work/_actions/ophub/amlogic-s9xxx-openwrt/main/openwrt
 
           # Set output information
-          echo "build_tag=OpenWrt_${{ inputs.source_branch }}_${{ inputs.openwrt_storage }}_$(date +"%Y.%m")" >> ${GITHUB_ENV}
+          echo "build_tag=${REPO_BRANCH}_$(date +"%Y.%m.%d")" >> ${GITHUB_ENV}
           echo -e "REPO_URL: [ ${REPO_URL} ]\nREPO_BRANCH: [ ${REPO_BRANCH} ]\nREPO_NAME: [ ${REPO_NAME} ]"
           df -hT ${PWD}
           echo "REPO_URL=${REPO_URL}" >> ${GITHUB_ENV}

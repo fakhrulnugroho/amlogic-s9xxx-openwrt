@@ -12,7 +12,7 @@ on:
       source_branch:
         description: "Select the source branch"
         required: true
-        default: "openwrt_openwrt-24.10"
+        default: "openwrt_v24.10.5"
       openwrt_board:
         description: "Select device board"
         required: true
